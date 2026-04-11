@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nbtheproducer</title>
+    <style>
+        /* Base Reset & Vibe */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #030303;
+            color: #e0e0e0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            text-transform: lowercase;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            cursor: default;
+        }
+
+        /* Animated Ambient Glow */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 50% 50%, rgba(70, 30, 120, 0.1) 0%, rgba(10, 20, 60, 0.05) 30%, rgba(3, 3, 3, 0) 70%);
+            z-index: -2;
+            pointer-events: none;
+            animation: pulseGlow 10s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-48%, -52%) scale(1.1);
+            }
+        }
+
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Navigation */
+        nav.main-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2.5rem 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(3,3,3,1) 0%, rgba(3,3,3,0) 100%);
+        }
+
+            nav.main-nav a {
+                color: #555;
+                text-decoration: none;
+                font-size: 0.75rem;
+                letter-spacing: 0.1em;
+                transition: color 0.4s ease;
+            }
+
+                nav.main-nav a:hover {
+                    color: #fff;
+                }
+
+        /* Section Layout */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Marquee Effect (Added for "filling" the space) */
+        .marquee {
+            width: 100vw;
+            overflow: hidden;
+            white-space: nowrap;
+            position: absolute;
+            bottom: 2rem;
+            opacity: 0.1;
+            font-size: 5rem;
+            font-weight: 800;
+            pointer-events: none;
+        }
+
+            .marquee div {
+                display: inline-block;
+                animation: marquee 20s linear infinite;
+            }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Typography */
+        h1.hero {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 400;
+            letter-spacing: -0.06em;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .coordinates {
+            font-family: monospace;
+            font-size: 0.65rem;
+            color: #333;
+            margin-bottom: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* Tracklist Improvements */
+        .tracklist {
+            margin-top: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .track-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 0.8rem;
+            transition: all 0.4s ease;
+        }
+
+            .track-item:hover {
+                border-bottom: 1px solid rgba(138, 43, 226, 0.4);
+                transform: translateX(5px);
+            }
+
+        .track-name {
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        .track-meta {
+            font-family: monospace;
+            font-size: 0.65rem;
+            color: #444;
+            text-transform: uppercase;
+        }
+
+        .spotify-container {
+            width: 100%;
+            margin: 3rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        /* Catalog / Visuals */
+        .visual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 4rem;
+        }
+
+        .visual-item {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #111;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+            .visual-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.6;
+                filter: grayscale(1);
+                transition: all 0.6s ease;
+            }
+
+            .visual-item:hover img {
+                opacity: 1;
+                filter: grayscale(0);
+                transform: scale(1.05);
+            }
+
+        .product-card {
+            margin-top: 4rem;
+        }
+
+        .product-image {
+            width: 100%;
+            max-width: 350px;
+            filter: grayscale(0.5);
+            transition: 0.5s;
+        }
+
+            .product-image:hover {
+                filter: grayscale(0);
+            }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            padding: 4rem;
+            font-size: 0.7rem;
+            color: #222;
+            letter-spacing: 0.3em;
+        }
+
+        @media (max-width: 600px) {
+            .visual-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <div class="grain"></div>
+
+    <nav class="main-nav">
+        <a href="#home">home</a>
+        <a href="#music">music</a>
+        <a href="#catalog">catalog</a>
+    </nav>
+
+    <section id="home">
+        <div class="marquee">
+            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer &nbsp;</div>
+            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer &nbsp;</div>
+        </div>
+
+        <div class="container fade-in">
+            <div class="coordinates">NB WRLD ON THE WAY° w</div>
+            <h1 class="hero">nbtheproducer</h1>
+            <p class="tagline" style="color: #444;">I make and produce music</p>
+
+            <nav class="socials" style="margin-top: 2rem; display: flex; gap: 2rem; justify-content: center;">
+                <a href="https://www.instagram.com/nnnmgmt/" target="_blank" style="color: #666; text-decoration: none; font-size: 0.8rem;">instagram</a>
+                <a href="https://soundcloud.com/nbtheproducer" target="_blank" style="color: #666; text-decoration: none; font-size: 0.8rem;">soundcloud</a>
+                <a href="#" style="color: #666; text-decoration: none; font-size: 0.8rem;">spotify</a>
+            </nav>
+        </div>
+    </section>
+
+    <section id="music">
+        <div class="container fade-in">
+            <h2 style="font-weight: 400; letter-spacing: -0.02em;">latest releases</h2>
+
+            <div class="spotify-container">
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2QhPerzkQjKt1QK6BVQyQ3?utm_source=generator" width="100%" height="200" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+
+            <div class="tracklist">
+                <a href="https://www.youtube.com/watch?v=AFA0XEFQ9uA" target="_blank" class="track-item">
+                    <span class="track-name">01. airdrop</span>
+                    <span class="track-meta">nbtheproducer - nb wrld</span>
+                </a>
+                <a href="#" class="track-item">
+                    <span class="track-name">02. '13</span>
+                    <span class="track-meta">nbtheproducer - album</span>
+                </a>
+                <a href="#" class="track-item">
+                    <span class="track-name">03. play it back 3</span>
+                    <span class="track-meta">nbtheproducer - single</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="catalog">
+        <div class="container fade-in">
+            <h2 class="catalog-title">catalog</h2>
+            <div class="product-card">
+                <img src="c6947d9bf7d4459e865a56c0bed19689.png" alt="i heart nbtheproducer t-shirt" class="product-image">
+                <div class="product-info" style="margin-top: 2rem;">
+                    i heart nbtheproducer t-shirt — $20
+                    <span class="sold-out" style="text-decoration: line-through; color: #333; display: block; margin-top: 0.5rem;">(sold out)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 nbtheproducer // all rights reserved
+    </footer>
+
+</body>
+</html>
