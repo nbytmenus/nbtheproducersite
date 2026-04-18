@@ -11,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
             scroll-behavior: smooth;
+            cursor: none !important;
         }
 
         body {
@@ -21,7 +22,42 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            cursor: default;
+        }
+
+        /* --- Custom Cursor Styles --- */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #fff;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: width 0.2s ease-out, height 0.2s ease-out, background-color 0.2s ease-out;
+        }
+
+        /* --- Ambient Background Canvas --- */
+        #ambient-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* Animated Ambient Glow */
@@ -61,6 +97,62 @@
             opacity: 0.05;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
+
+        /* --- Floating Animations --- */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes floatSubtle {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .float-heavy {
+            animation: float 6s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .float-subtle {
+            animation: floatSubtle 4s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        /* Staggered floating delays so they don't all move at the exact same time */
+        .delay-1 {
+            animation-delay: 0.5s;
+        }
+
+        .delay-2 {
+            animation-delay: 1.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 1.8s;
+        }
+
+        /* --- Scroll Reveal Animations --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+            .reveal.active {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
 
         /* Navigation */
         nav.main-nav {
@@ -103,14 +195,14 @@
             max-width: 600px;
         }
 
-        /* Marquee Effect (Added for "filling" the space) */
+        /* Marquee Effect */
         .marquee {
             width: 100vw;
             overflow: hidden;
             white-space: nowrap;
             position: absolute;
             bottom: 2rem;
-            opacity: 0.1;
+            opacity: 0.05;
             font-size: 5rem;
             font-weight: 800;
             pointer-events: none;
@@ -118,7 +210,7 @@
 
             .marquee div {
                 display: inline-block;
-                animation: marquee 20s linear infinite;
+                animation: marquee 25s linear infinite;
             }
 
         @keyframes marquee {
@@ -138,17 +230,23 @@
             letter-spacing: -0.06em;
             margin-bottom: 0.5rem;
             color: #ffffff;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.15); /* Subtle glow */
+            transition: text-shadow 0.4s ease;
         }
+
+            h1.hero:hover {
+                text-shadow: 0 0 40px rgba(138, 43, 226, 0.8); /* Stronger glow on hover */
+            }
 
         .coordinates {
             font-family: monospace;
             font-size: 0.65rem;
-            color: #333;
+            color: #555;
             margin-bottom: 1rem;
             letter-spacing: 0.2em;
         }
 
-        /* Tracklist Improvements */
+        /* Tracklist */
         .tracklist {
             margin-top: 4rem;
             display: flex;
@@ -169,7 +267,7 @@
 
             .track-item:hover {
                 border-bottom: 1px solid rgba(138, 43, 226, 0.4);
-                transform: translateX(5px);
+                transform: translateX(10px); /* Slides right slightly */
             }
 
         .track-name {
@@ -190,39 +288,14 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            transition: transform 0.4s ease;
         }
+
+            .spotify-container:hover {
+                transform: scale(1.02);
+            }
 
         /* Catalog / Visuals */
-        .visual-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 4rem;
-        }
-
-        .visual-item {
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #111;
-            overflow: hidden;
-            border-radius: 2px;
-        }
-
-            .visual-item img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                opacity: 0.6;
-                filter: grayscale(1);
-                transition: all 0.6s ease;
-            }
-
-            .visual-item:hover img {
-                opacity: 1;
-                filter: grayscale(0);
-                transform: scale(1.05);
-            }
-
         .product-card {
             margin-top: 4rem;
         }
@@ -231,67 +304,146 @@
             width: 100%;
             max-width: 350px;
             filter: grayscale(0.5);
-            transition: 0.5s;
+            transition: all 0.6s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
             .product-image:hover {
                 filter: grayscale(0);
+                transform: scale(1.05) translateY(-10px); /* Lifts up on hover */
             }
-
-        .fade-in {
-            opacity: 0;
-            animation: fadeIn 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
         footer {
             padding: 4rem;
             font-size: 0.7rem;
-            color: #222;
+            color: #333;
             letter-spacing: 0.3em;
         }
 
+        /* AirDrop Notification Styles */
+        .ios-airdrop-banner {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translate(-50%, -150%);
+            background-color: rgba(30, 30, 30, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            padding: 12px 24px 12px 16px;
+            gap: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            cursor: pointer;
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+            .ios-airdrop-banner.show {
+                transform: translate(-50%, 0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .airdrop-icon-container {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .airdrop-icon {
+            width: 22px;
+            height: 22px;
+        }
+
+        .airdrop-text-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .airdrop-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+            text-transform: none;
+        }
+
+        .airdrop-message {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #aaaaaa;
+            text-transform: none;
+        }
+
         @media (max-width: 600px) {
-            .visual-grid {
-                grid-template-columns: 1fr;
+            .ios-airdrop-banner {
+                width: 90%;
+                padding: 10px 16px;
+            }
+
+            .cursor-dot, .cursor-outline {
+                display: none;
+            }
+
+            * {
+                cursor: auto !important;
             }
         }
     </style>
 </head>
 <body>
 
+    <div id="airdrop-notification" class="ios-airdrop-banner float-subtle">
+        <div class="airdrop-icon-container">
+            <svg class="airdrop-icon" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21a9 9 0 0 0 9-9 9.05 9.05 0 0 0-.5-2.5" />
+                <path d="M2.5 9.5A9.05 9.05 0 0 0 3 12a9 9 0 0 0 9 9" />
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 16v-9" />
+                <path d="M9 10l3-3 3 3" />
+            </svg>
+        </div>
+        <div class="airdrop-text-content">
+            <div class="airdrop-title">AirDrop</div>
+            <div class="airdrop-message">listen to AirDrop! by nbtheproducer</div>
+        </div>
+    </div>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <canvas id="ambient-canvas"></canvas>
     <div class="ambient-glow"></div>
     <div class="grain"></div>
 
-    <nav class="main-nav">
-        <a href="#home">home</a>
-        <a href="#music">music</a>
-        <a href="#catalog">catalog</a>
+    <nav class="main-nav reveal">
+        <a href="#home" class="float-subtle">home</a>
+        <a href="#music" class="float-subtle delay-1">music</a>
+        <a href="#catalog" class="float-subtle delay-2">catalog</a>
     </nav>
 
     <section id="home">
         <div class="marquee">
-            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer &nbsp;</div>
-            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer &nbsp;</div>
+            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer  </div>
+            <div>nbtheproducer nbtheproducer nbtheproducer nbtheproducer  </div>
         </div>
 
-        <div class="container fade-in">
-            <div class="coordinates">NB WRLD ON THE WAY° w</div>
-            <h1 class="hero">nbtheproducer</h1>
-            <p class="tagline" style="color: #444;">I make and produce music</p>
+        <div class="container reveal">
+            <div class="coordinates float-subtle">NB WRLD ON THE WAY° w</div>
+            <h1 class="hero float-heavy">nbtheproducer</h1>
+            <p class="tagline float-subtle delay-1" style="color: #666;">I make and produce music</p>
 
-            <nav class="socials" style="margin-top: 2rem; display: flex; gap: 2rem; justify-content: center;">
+            <nav class="socials float-subtle delay-2" style="margin-top: 2rem; display: flex; gap: 2rem; justify-content: center;">
                 <a href="https://www.instagram.com/nnnmgmt/" target="_blank" style="color: #666; text-decoration: none; font-size: 0.8rem;">instagram</a>
                 <a href="https://soundcloud.com/nbtheproducer" target="_blank" style="color: #666; text-decoration: none; font-size: 0.8rem;">soundcloud</a>
                 <a href="#" style="color: #666; text-decoration: none; font-size: 0.8rem;">spotify</a>
@@ -300,23 +452,23 @@
     </section>
 
     <section id="music">
-        <div class="container fade-in">
-            <h2 style="font-weight: 400; letter-spacing: -0.02em;">latest releases</h2>
+        <div class="container reveal">
+            <h2 class="float-subtle" style="font-weight: 400; letter-spacing: -0.02em;">latest releases</h2>
 
-            <div class="spotify-container">
+            <div class="spotify-container reveal delay-1">
                 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/2QhPerzkQjKt1QK6BVQyQ3?utm_source=generator" width="100%" height="200" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             </div>
 
             <div class="tracklist">
-                <a href="https://www.youtube.com/watch?v=AFA0XEFQ9uA" target="_blank" class="track-item">
+                <a href="https://www.youtube.com/watch?v=AFA0XEFQ9uA" target="_blank" class="track-item reveal">
                     <span class="track-name">01. airdrop</span>
                     <span class="track-meta">nbtheproducer - nb wrld</span>
                 </a>
-                <a href="#" class="track-item">
+                <a href="#" class="track-item reveal delay-1">
                     <span class="track-name">02. '13</span>
                     <span class="track-meta">nbtheproducer - album</span>
                 </a>
-                <a href="#" class="track-item">
+                <a href="#" class="track-item reveal delay-2">
                     <span class="track-name">03. play it back 3</span>
                     <span class="track-meta">nbtheproducer - single</span>
                 </a>
@@ -325,21 +477,176 @@
     </section>
 
     <section id="catalog">
-        <div class="container fade-in">
-            <h2 class="catalog-title">catalog</h2>
+        <div class="container reveal">
+            <h2 class="catalog-title float-subtle">catalog</h2>
             <div class="product-card">
-                <img src="c6947d9bf7d4459e865a56c0bed19689.png" alt="i heart nbtheproducer t-shirt" class="product-image">
-                <div class="product-info" style="margin-top: 2rem;">
+                <img src="c6947d9bf7d4459e865a56c0bed19689.png" alt="i heart nbtheproducer t-shirt" class="product-image float-heavy delay-1">
+                <div class="product-info float-subtle delay-2" style="margin-top: 2rem;">
                     i heart nbtheproducer t-shirt — $20
-                    <span class="sold-out" style="text-decoration: line-through; color: #333; display: block; margin-top: 0.5rem;">(sold out)</span>
+                    <span class="sold-out" style="text-decoration: line-through; color: #444; display: block; margin-top: 0.5rem;">(sold out)</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer>
-        &copy; 2026 nbtheproducer // all rights reserved
+    <footer class="reveal float-subtle">
+        © 2026 nbtheproducer // all rights reserved
     </footer>
 
+    <script>
+        // --- 1. Scroll Reveal Intersection Observer ---
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.15 }); // Triggers when 15% of the element is visible
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // --- 2. AirDrop Notification Logic ---
+        const airdropNotification = document.getElementById('airdrop-notification');
+        setTimeout(() => { airdropNotification.classList.add('show'); }, 1500);
+        airdropNotification.addEventListener('click', () => {
+            airdropNotification.classList.remove('show');
+        });
+        setTimeout(() => {
+            if (airdropNotification.classList.contains('show')) airdropNotification.classList.remove('show');
+        }, 9500);
+
+        // --- 3. Custom Cursor Logic ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+
+        window.addEventListener('mousemove', function (e) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.left = `${mouseX}px`;
+            cursorDot.style.top = `${mouseY}px`;
+            cursorOutline.animate({ left: `${mouseX}px`, top: `${mouseY}px` }, { duration: 500, fill: "forwards" });
+        });
+
+        const interactiveElements = document.querySelectorAll('a, .product-image, .ios-airdrop-banner');
+        interactiveElements.forEach((el) => {
+            el.addEventListener('mouseenter', () => {
+                cursorOutline.style.width = '60px';
+                cursorOutline.style.height = '60px';
+                cursorOutline.style.backgroundColor = 'rgba(138, 43, 226, 0.1)'; // Purple tint on hover
+                cursorOutline.style.borderColor = 'rgba(138, 43, 226, 0.6)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorOutline.style.width = '40px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.backgroundColor = 'transparent';
+                cursorOutline.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+            });
+        });
+
+        // --- 4. Canvas Particle Animation Logic ---
+        const canvas = document.getElementById('ambient-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        const numberOfParticles = (canvas.width * canvas.height) / 12000;
+
+        class Particle {
+            constructor(x, y, directionX, directionY, size) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'rgba(138, 43, 226, 0.3)';
+                ctx.fill();
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+
+                let dx = mouseX - this.x;
+                let dy = mouseY - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 120) {
+                    this.x -= dx * 0.02;
+                    this.y -= dy * 0.02;
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 0.5;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.8) - 0.4;
+                let directionY = (Math.random() * 0.8) - 0.4;
+                particlesArray.push(new Particle(x, y, directionX, directionY, size));
+            }
+        }
+
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                        + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(100, 100, 150, ${opacityValue * 0.15})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+                let mouseDist = ((particlesArray[a].x - mouseX) * (particlesArray[a].x - mouseX))
+                    + ((particlesArray[a].y - mouseY) * (particlesArray[a].y - mouseY));
+                if (mouseDist < 25000) {
+                    let mouseOpacity = 1 - (mouseDist / 25000);
+                    ctx.strokeStyle = `rgba(138, 43, 226, ${mouseOpacity * 0.4})`;
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        window.addEventListener('resize', function () {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            init();
+        });
+
+        init();
+        animate();
+    </script>
 </body>
 </html>
