@@ -1,97 +1,50 @@
-// --- CUSTOM AUTH SYSTEM LOGIC ---
-const authModal = document.getElementById('user-auth-modal');
-const authTitle = document.getElementById('auth-modal-title');
-const authSubmitBtn = document.getElementById('auth-submit-btn');
-const authTogglePrompt = document.getElementById('auth-toggle-prompt');
-const authToggleBtn = document.getElementById('auth-toggle-btn');
-const authError = document.getElementById('auth-error');
-const authForm = document.getElementById('auth-form');
-
-let isLoginMode = true;
-
-// Get local "database" of users or create an empty one
-let usersDB = JSON.parse(localStorage.getItem('nb_users_db')) || {};
-
-function openAuthModal(mode) {
-    isLoginMode = mode === 'login';
-    authTitle.innerText = isLoginMode ? 'log in' : 'sign up';
-    authSubmitBtn.innerText = isLoginMode ? 'enter' : 'create account';
-    authTogglePrompt.innerText = isLoginMode ? "don't have an account?" : "already have an account?";
-    authToggleBtn.innerText = isLoginMode ? "sign up" : "log in";
-    
-    document.getElementById('auth-username').value = '';
-    document.getElementById('auth-password').value = '';
-    authError.style.display = 'none';
-    
-    authModal.classList.add('active');
+// --- GOOGLE AUTH LOGIC ---
+// Decodes the JWT token Google sends back
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
 }
 
-document.getElementById('nav-login-btn').addEventListener('click', () => openAuthModal('login'));
-document.getElementById('nav-signup-btn').addEventListener('click', () => openAuthModal('signup'));
-
-document.getElementById('close-user-auth').addEventListener('click', () => {
-    authModal.classList.remove('active');
-});
-
-authToggleBtn.addEventListener('click', () => {
-    openAuthModal(isLoginMode ? 'signup' : 'login');
-});
-
-authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const user = document.getElementById('auth-username').value.trim();
-    const pass = document.getElementById('auth-password').value;
-
-    if (isLoginMode) {
-        // Handle Login
-        if (usersDB[user] && usersDB[user] === pass) {
-            logUserIn(user);
-            authModal.classList.remove('active');
-        } else {
-            authError.innerText = "invalid username or password.";
-            authError.style.display = 'block';
-            document.getElementById('auth-username').classList.add('shake');
-            setTimeout(() => document.getElementById('auth-username').classList.remove('shake'), 400);
-        }
-    } else {
-        // Handle Signup
-        if (usersDB[user]) {
-            authError.innerText = "username already exists.";
-            authError.style.display = 'block';
-        } else if (user.length < 3 || pass.length < 4) {
-            authError.innerText = "username > 2 chars, password > 3 chars.";
-            authError.style.display = 'block';
-        } else {
-            usersDB[user] = pass;
-            localStorage.setItem('nb_users_db', JSON.stringify(usersDB));
-            logUserIn(user);
-            authModal.classList.remove('active');
-        }
-    }
-});
-
-function logUserIn(username) {
-    localStorage.setItem('nb_active_session', username);
-    document.getElementById('auth-buttons').style.display = 'none';
+// Handles successful sign-in
+window.handleCredentialResponse = function(response) {
+    const responsePayload = decodeJwtResponse(response.credential);
+    
+    // Update the UI
+    document.querySelector('.g_id_signin').style.display = 'none';
     document.getElementById('user-profile').style.display = 'flex';
-    document.getElementById('user-name').innerText = username.toLowerCase();
-    document.getElementById('user-avatar').innerText = username.charAt(0).toLowerCase();
-}
+    document.getElementById('user-name').innerText = responsePayload.given_name.toLowerCase();
+    document.getElementById('user-avatar').src = responsePayload.picture;
 
-// Check login state on load
-window.addEventListener('load', () => {
-    const activeSession = localStorage.getItem('nb_active_session');
-    if (activeSession) {
-        logUserIn(activeSession);
+    // Save basic user info to local storage
+    localStorage.setItem('nb_user', JSON.stringify({
+        name: responsePayload.given_name,
+        pic: responsePayload.picture,
+        id: responsePayload.sub
+    }));
+};
+
+// Check if user is already logged in on page load
+window.addEventListener('load', function() {
+    const savedUser = localStorage.getItem('nb_user');
+    if (savedUser) {
+        const user = JSON.parse(savedUser);
+        document.querySelector('.g_id_signin').style.display = 'none';
+        document.getElementById('user-profile').style.display = 'flex';
+        document.getElementById('user-name').innerText = user.name.toLowerCase();
+        document.getElementById('user-avatar').src = user.pic;
     }
 });
 
-// Handle Logout
+// Sign out logic
 document.getElementById('sign-out-btn').addEventListener('click', (e) => {
     e.preventDefault();
-    localStorage.removeItem('nb_active_session');
-    document.getElementById('auth-buttons').style.display = 'flex';
-    document.getElementById('user-profile').style.display = 'none';
+    localStorage.removeItem('nb_user'); // Delete saved session
+    document.querySelector('.g_id_signin').style.display = 'block'; // Show login button
+    document.getElementById('user-profile').style.display = 'none'; // Hide profile
 });
 
 // --- ALBUM ACCORDION LOGIC ---
@@ -161,14 +114,13 @@ async function hashInput(text) {
 }
 
 window.addEventListener('keydown', (e) => {
-    if (e.key === 'h' && e.target.tagName !== 'INPUT' && !devPanel.classList.contains('active') && !authModal.classList.contains('active')) {
+    if (e.key === 'h' && e.target.tagName !== 'INPUT' && !devPanel.classList.contains('active')) {
         devAuthModal.classList.add('active');
         setTimeout(() => devPasscodeInput.focus(), 100);
     }
     if (e.key === 'Escape') {
         devAuthModal.classList.remove('active');
         devPanel.classList.remove('active');
-        authModal.classList.remove('active');
         devPasscodeInput.value = '';
         devErrorMsg.style.display = 'none';
     }
@@ -205,7 +157,7 @@ window.addEventListener('mousemove', function (e) {
 
 // Re-run hover logic whenever DOM might change
 setInterval(() => {
-    document.querySelectorAll('.dev-interactive, a, .album-header, .size-btn, #user-profile, .auth-toggle-link').forEach((el) => {
+    document.querySelectorAll('.dev-interactive, a, .album-header, .size-btn, #user-profile, .g_id_signin').forEach((el) => {
         if (!el.dataset.cursorBound) {
             el.dataset.cursorBound = true;
             el.addEventListener('mouseenter', () => {
@@ -241,7 +193,7 @@ class Particle {
         if (this.y > canvas.height || this.y < 0) this.baseDirectionY = -this.baseDirectionY;
         let dx = mouseX - this.x, dy = mouseY - this.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < globalRepelForce && !devPanel.classList.contains('active') && !authModal.classList.contains('active')) {
+        if (distance < globalRepelForce && !devPanel.classList.contains('active')) {
             this.x -= dx * 0.02; this.y -= dy * 0.02;
         }
         this.x += this.baseDirectionX * globalSpeedMultiplier;
@@ -278,7 +230,7 @@ function connectParticles() {
         }
         let mouseDist = ((particlesArray[a].x - mouseX) ** 2) + ((particlesArray[a].y - mouseY) ** 2);
         let maxMouseDist = (globalRepelForce * 2) ** 2;
-        if (mouseDist < maxMouseDist && !devPanel.classList.contains('active') && !authModal.classList.contains('active')) {
+        if (mouseDist < maxMouseDist && !devPanel.classList.contains('active')) {
             let mouseOpacity = 1 - (mouseDist / maxMouseDist);
             ctx.strokeStyle = `rgba(${rgb}, ${mouseOpacity * 0.4})`; ctx.lineWidth = 1.2;
             ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(mouseX, mouseY); ctx.stroke();
