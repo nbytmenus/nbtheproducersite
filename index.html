@@ -6,6 +6,8 @@
     <title>nbtheproducer</title>
     
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -47,26 +49,6 @@
         </div>
     </div>
 
-    <div id="user-auth-modal" class="dev-overlay">
-        <div class="auth-modal-ui">
-            <button class="auth-close dev-interactive" id="close-user-auth">[x]</button>
-            <h2 class="auth-modal-title" id="auth-modal-title">log in</h2>
-            
-            <div id="auth-error" class="auth-error-msg">invalid credentials.</div>
-
-            <form class="auth-form" id="auth-form">
-                <input type="text" id="auth-username" class="auth-input-field dev-interactive" placeholder="username" required autocomplete="off">
-                <input type="password" id="auth-password" class="auth-input-field dev-interactive" placeholder="password" required autocomplete="off">
-                <button type="submit" class="auth-submit-btn dev-interactive" id="auth-submit-btn">enter</button>
-            </form>
-
-            <div class="auth-toggle-text">
-                <span id="auth-toggle-prompt">don't have an account?</span> 
-                <span class="auth-toggle-link dev-interactive" id="auth-toggle-btn">sign up</span>
-            </div>
-        </div>
-    </div>
-
     <canvas id="ambient-canvas"></canvas>
     <div class="ambient-glow"></div>
     <div class="grain"></div>
@@ -80,14 +62,23 @@
         </div>
         
         <div class="auth-container">
-            <div id="auth-buttons">
-                <button id="nav-login-btn" class="nav-auth-btn dev-interactive">log in</button>
-                <button id="nav-signup-btn" class="nav-auth-btn dev-interactive">sign up</button>
+            <div id="g_id_onload"
+                 data-client_id="306219515818-k3pm4vtk4mt1i55r376s7dbfagpnoiuv.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            
+            <div class="g_id_signin dev-interactive" 
+                 data-type="standard" 
+                 data-theme="filled_black" 
+                 data-text="signin_with" 
+                 data-shape="pill" 
+                 data-logo_alignment="left">
             </div>
 
             <div id="user-profile">
-                <div class="user-avatar-placeholder" id="user-avatar">u</div>
-                <span id="user-name">user</span>
+                <img id="user-avatar" src="" alt="avatar">
+                <span id="user-name"></span>
                 <a href="#" id="sign-out-btn" class="dev-interactive">[x]</a>
             </div>
         </div>
